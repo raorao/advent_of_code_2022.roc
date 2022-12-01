@@ -22,8 +22,28 @@ elfWithMostCalories = \calories ->
 
         |> .max
 
-# TESTS
+elvesWithMostCalories = \calories ->
+    calories
+        |> List.append Empty
+        |> List.walk {current: 0, maxThree: [0,0,0]} \state, elem ->
+            when elem is
+                Food calorieCount ->
+                    { state & current: (state.current + calorieCount) }
+                Empty ->
+                    {
+                        current: 0,
+                        maxThree:
+                            state.maxThree
+                                |> List.append state.current
+                                |> List.sortDesc
+                                |> List.takeFirst 3
+                    }
 
+        |> .maxThree
+        |> List.sum
+
+
+# TESTS
 exampleInput = [
     Food 1000,
     Food 2000,
@@ -42,6 +62,7 @@ exampleInput = [
 ]
 
 expect elfWithMostCalories exampleInput == 24000
+expect elvesWithMostCalories exampleInput == 45000
 
 lastElfInput = [
     Food 1000,
@@ -2335,11 +2356,21 @@ parseRow = \row ->
                 Ok int -> Food int
                 Err _ -> crash "could not parse \(str)"
 
-result = input
+elves = input
     |> Str.split "\n"
     |> List.map parseRow
+
+part1 = elves
     |> elfWithMostCalories
     |> Num.toStr
 
+part2 = elves
+    |> elvesWithMostCalories
+    |> Num.toStr
+
 main =
-    Stdout.line "Elf with most calories has \(result)"
+    Stdout.line
+        """
+            Elf with most calories has \(part1)
+            Top three elves with most calories have \(part2)
+        """
