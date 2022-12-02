@@ -42,8 +42,31 @@ elvesWithMostCalories = \calories ->
         |> .maxThree
         |> List.sum
 
+parseRow = \row ->
+    when row is
+        "" -> Empty
+        str ->
+            when (Str.toNat str) is
+                Ok int -> Food int
+                Err _ -> crash "could not parse \(str)"
+
+main =
+    task =
+        input <- Path.fromStr "input.txt" |> File.readUtf8 |> Task.await
+
+        parsedInput = input
+            |> Str.split "\n"
+            |> List.map parseRow
+
+        part1 = parsedInput |> elfWithMostCalories |> Num.toStr
+        part2 = parsedInput |> elvesWithMostCalories |> Num.toStr
+
+        Stdout.write "part 1: \(part1) part 2: \(part2)"
+
+    Task.onFail task \_ -> crash "Failed to read and parse input"
 
 # TESTS
+
 exampleInput = [
     Food 1000,
     Food 2000,
@@ -98,26 +121,3 @@ expect elfWithMostCalories firstElfInput == 15000
 emptyInput = [ ]
 
 expect elfWithMostCalories emptyInput == 0
-
-parseRow = \row ->
-    when row is
-        "" -> Empty
-        str ->
-            when (Str.toNat str) is
-                Ok int -> Food int
-                Err _ -> crash "could not parse \(str)"
-
-main =
-    task =
-        input <- Path.fromStr "input.txt" |> File.readUtf8 |> Task.await
-
-        parsedInput = input
-            |> Str.split "\n"
-            |> List.map parseRow
-
-        part1 = parsedInput |> elfWithMostCalories |> Num.toStr
-        part2 = parsedInput |> elvesWithMostCalories |> Num.toStr
-
-        Stdout.write "part 1: \(part1) part 2: \(part2)"
-
-    Task.onFail task \_ -> crash "Failed to read and parse input"

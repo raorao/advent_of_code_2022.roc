@@ -41,19 +41,6 @@ scoreInput = \encryptedGames, decryptStrategy ->
         |> List.map scoreGame
         |> List.sum
 
-## Tests
-
-expect scoreGame (Game Rock Paper) == 8
-
-sampleInput = [
-    EncryptedGame Rock Y,
-    EncryptedGame Paper X,
-    EncryptedGame Scissors Z
-]
-
-expect scoreInput sampleInput translateStrategy == 15
-expect scoreInput sampleInput matchStrategy == 12
-
 parseRow = \rowStr ->
     when (Str.split rowStr " ") is
         [oppStr, ownStr] ->
@@ -84,3 +71,16 @@ main =
         Stdout.write "part 1: \(part1) part 2: \(part2)"
 
     Task.onFail task \_ -> crash "Failed to read and parse input"
+
+## Tests
+
+expect scoreGame (Game Rock Paper) == 8
+
+sampleInput = [
+    EncryptedGame Rock Y,
+    EncryptedGame Paper X,
+    EncryptedGame Scissors Z
+]
+
+expect scoreInput sampleInput translateStrategy == 15
+expect scoreInput sampleInput matchStrategy == 12
