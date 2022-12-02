@@ -3,19 +3,25 @@ app "day 2"
     imports [pf.Stdout]
     provides [main] to pf
 
-# trustStrategy : EncryptedThrow -> [Rock, Paper, Scissors]
-trustStrategy = \encrypted ->
-    when encrypted is
-        X -> Rock 
-        Y -> Paper
-        Z -> Scissors
 
-# decrypt : EncryptedGame [Rock, Paper, Scissors] [X, Y, Z], ([X, Y, Z] -> [Rock, Paper, Scissors])  -> Game
-decrypt = \encrypted, strategy ->
+translateStrategy = \encrypted ->
     when encrypted is
-        EncryptedGame opp own -> Game opp (strategy own)
+        EncryptedGame opp X -> Game opp Rock
+        EncryptedGame opp Y -> Game opp Paper
+        EncryptedGame opp Z -> Game opp Scissors
 
-# scoreGame : Game -> Nat
+matchStrategy = \encrypted ->
+    when encrypted is 
+        EncryptedGame Rock X -> Game Rock Scissors
+        EncryptedGame Rock Y -> Game Rock Rock
+        EncryptedGame Rock Z -> Game Rock Paper
+        EncryptedGame Paper X -> Game Paper Rock
+        EncryptedGame Paper Y -> Game Paper Paper
+        EncryptedGame Paper Z -> Game Paper Scissors
+        EncryptedGame Scissors X -> Game Scissors Paper
+        EncryptedGame Scissors Y -> Game Scissors Scissors
+        EncryptedGame Scissors Z -> Game Scissors Rock
+
 scoreGame = \game ->
     throwBonus = when game is 
         Game _ Rock -> 1
@@ -29,10 +35,9 @@ scoreGame = \game ->
     
     score + throwBonus
 
-# scoreInput : List EncryptedGame, ([X, Y, Z] -> [Rock, Paper, Scissors]) -> Nat
-scoreInput = \encryptedGames, strategy ->
+scoreInput = \encryptedGames, decryptStrategy ->
     encryptedGames
-        |> List.map (\e -> decrypt e strategy)
+        |> List.map decryptStrategy
         |> List.map scoreGame
         |> List.sum
 
@@ -40,15 +45,14 @@ scoreInput = \encryptedGames, strategy ->
 
 expect scoreGame (Game Rock Paper) == 8
 
-expect (decrypt (EncryptedGame Rock X) trustStrategy) == (Game Rock Rock)
-
 sampleInput = [
     EncryptedGame Rock Y, 
     EncryptedGame Paper X, 
     EncryptedGame Scissors Z
 ]
 
-expect scoreInput sampleInput trustStrategy == 15
+expect scoreInput sampleInput translateStrategy == 15
+expect scoreInput sampleInput matchStrategy == 12
 
 input = 
     """C X
@@ -2580,8 +2584,8 @@ parsedInput = input
     |> Str.split "\n"
     |> List.map parseRow
 
-part1 = scoreInput parsedInput trustStrategy
-    |> Num.toStr
+part1 = scoreInput parsedInput translateStrategy |> Num.toStr
+part2 = scoreInput parsedInput matchStrategy |> Num.toStr
 
 main =
-    Stdout.line "Answer to part 1 is \(part1)"
+    Stdout.line "part 1: \(part1) part 2: \(part2)"
