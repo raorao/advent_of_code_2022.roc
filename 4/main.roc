@@ -33,10 +33,29 @@ fullyContains = \pair ->
         _ ->
             crash "pair had incorrect number of elements"
 
+partiallyContains = \pair ->
+    when pair is
+        [fst, scd] ->
+            if fst.start > scd.start then
+                fst.start <= scd.end
+            else if fst.start < scd.start then
+                fst.end >= scd.start
+            else
+                Bool.true
+        _ ->
+            crash "pair had incorrect number of elements"
+
+
 pairsFullyContain = \rows ->
     rows
         |> List.map parseRow
         |> List.keepIf fullyContains
+        |> List.len
+
+pairsPartiallyContain = \rows ->
+    rows
+        |> List.map parseRow
+        |> List.keepIf partiallyContains
         |> List.len
 
 main =
@@ -47,8 +66,9 @@ main =
             |> Str.split "\n"
 
         part1 = pairsFullyContain parsedInput |> Num.toStr
+        part2 = pairsPartiallyContain parsedInput |> Num.toStr
 
-        Stdout.write "part 1: \(part1)"
+        Stdout.write "part 1: \(part1) part 2: \(part2)"
 
     Task.onFail task \_ -> crash "Failed to read and parse input"
 
@@ -75,4 +95,14 @@ expect pairsFullyContain [ "2-8,3-8" ] == 1
 
 expect pairsFullyContain sampleInput == 2
 
+expect pairsPartiallyContain [ "2-4,6-8" ] == 0
+expect pairsPartiallyContain [ "2-3,4-5" ] == 0
+expect pairsPartiallyContain [ "5-7,7-9" ] == 1
+expect pairsPartiallyContain [ "2-8,3-7" ] == 1
+expect pairsPartiallyContain [ "6-7,4-6" ] == 1
+expect pairsPartiallyContain [ "2-6,4-8" ] == 1
 
+expect pairsFullyContain [ "1-8,1-7" ] == 1
+expect pairsFullyContain [ "3-8,2-8" ] == 1
+
+expect pairsPartiallyContain sampleInput == 4
