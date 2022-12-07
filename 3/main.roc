@@ -4,13 +4,16 @@ app "day 3"
     provides [main] to pf
 
 matchingItem = \rucksack ->
-    chars = rucksack
+    chars =
+        rucksack
         |> Str.graphemes
 
-    {before, others} = chars
-        |> List.split ((List.len chars) // 2)
+    { before, others } =
+        chars
+        |> List.split (List.len chars // 2)
 
-    result = before
+    result =
+        before
         |> Set.fromList
         |> Set.intersection (Set.fromList others)
         |> Set.toList
@@ -21,12 +24,13 @@ matchingItem = \rucksack ->
         Err ListWasEmpty -> crash "error: list was empty"
 
 matchingBadge = \rucksacks ->
-    result = rucksacks
+    result =
+        rucksacks
         |> List.map Str.graphemes
         |> List.map Set.fromList
         |> List.walk Set.empty \state, elem ->
             if Set.len state > 0 then
-               Set.intersection state elem
+                Set.intersection state elem
             else
                 elem
         |> Set.toList
@@ -37,7 +41,8 @@ matchingBadge = \rucksacks ->
         Err ListWasEmpty -> crash "error: list was empty"
 
 itemPriority = \char ->
-    codeUnit = char
+    codeUnit =
+        char
         |> Str.toScalars
         |> List.first
         |> Result.withDefault 0
@@ -52,30 +57,31 @@ itemPriority = \char ->
 
 rucksackPriorities = \rucksacks ->
     rucksacks
-        |> List.map matchingItem
-        |> List.map itemPriority
-        |> List.sum
+    |> List.map matchingItem
+    |> List.map itemPriority
+    |> List.sum
 
 groupPriorities = \rucksacks ->
-    {groups, current} = List.walk rucksacks {groups: [ ], current: [ ]} \state, elem ->
+    { groups, current } = List.walk rucksacks { groups: [], current: [] } \state, elem ->
         if List.len state.current < 3 then
-            { state & current: (List.append state.current elem) }
+            { state & current: List.append state.current elem }
         else
             {
-                groups: (List.append state.groups state.current),
-                current: [elem]
+                groups: List.append state.groups state.current,
+                current: [elem],
             }
 
     groups
-        |> List.append current
-        |> List.map matchingBadge
-        |> List.map itemPriority
-        |> List.sum
+    |> List.append current
+    |> List.map matchingBadge
+    |> List.map itemPriority
+    |> List.sum
 main =
     task =
         input <- Path.fromStr "input.txt" |> File.readUtf8 |> Task.await
 
-        parsedInput = input
+        parsedInput =
+            input
             |> Str.split "\n"
 
         part1 = rucksackPriorities parsedInput |> Num.toStr
@@ -87,14 +93,13 @@ main =
     Task.onFail task \_ -> crash "Failed to read and parse input"
 
 ## Tests
-
 sampleInput = [
     "vJrwpWtwJgWrhcsFMMfFFhFp",
     "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL",
     "PmmdzqPrVvPwwTWBwg",
     "wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn",
     "ttgJtRGJQctTZtZT",
-    "CrZsJsPPZsGzwwsLwLmpwMDw"
+    "CrZsJsPPZsGzwwsLwLmpwMDw",
 ]
 
 expect matchingItem "vJrwpWtwJgWrhcsFMMfFFhFp" == "p"

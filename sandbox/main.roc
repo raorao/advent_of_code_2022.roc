@@ -3,22 +3,20 @@ app "hello"
     imports [pf.Stdout]
     provides [main] to pf
 
-
 animals = { birds: 2, iguanas: 0 }
 
-addAndStringify = \{birds: num1, iguanas: num2} ->
+addAndStringify = \{ birds: num1, iguanas: num2 } ->
     sum = num1 + num2
 
     when sum is
-       0 -> "no"
-       1 | 2 | 3 -> "fewer than three"
-       num -> Num.toStr num
+        0 -> "no"
+        1 | 2 | 3 -> "fewer than three"
+        num -> Num.toStr num
 
 res = addAndStringify animals
 
 main =
     Stdout.line "There are \(res) animals."
-
 
 pluralize = \singular, plural, count ->
     countStr = Num.toStr count

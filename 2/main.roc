@@ -3,7 +3,6 @@ app "day 2"
     imports [pf.Stdout, pf.Path, pf.File, pf.Task]
     provides [main] to pf
 
-
 translateStrategy = \encrypted ->
     when encrypted is
         EncryptedGame opp X -> Game opp Rock
@@ -37,12 +36,12 @@ scoreGame = \game ->
 
 scoreInput = \encryptedGames, decryptStrategy ->
     encryptedGames
-        |> List.map decryptStrategy
-        |> List.map scoreGame
-        |> List.sum
+    |> List.map decryptStrategy
+    |> List.map scoreGame
+    |> List.sum
 
 parseRow = \rowStr ->
-    when (Str.split rowStr " ") is
+    when Str.split rowStr " " is
         [oppStr, ownStr] ->
             opp = when oppStr is
                 "A" -> Rock
@@ -54,14 +53,17 @@ parseRow = \rowStr ->
                 "Y" -> Y
                 "Z" -> Z
                 _ -> crash "unknown own throw \(ownStr)"
+
             EncryptedGame opp own
+
         _ -> crash "could not parse \(rowStr)"
 
 main =
     task =
         input <- Path.fromStr "input.txt" |> File.readUtf8 |> Task.await
 
-        parsedInput = input
+        parsedInput =
+            input
             |> Str.split "\n"
             |> List.map parseRow
 
@@ -73,13 +75,12 @@ main =
     Task.onFail task \_ -> crash "Failed to read and parse input"
 
 ## Tests
-
 expect scoreGame (Game Rock Paper) == 8
 
 sampleInput = [
     EncryptedGame Rock Y,
     EncryptedGame Paper X,
-    EncryptedGame Scissors Z
+    EncryptedGame Scissors Z,
 ]
 
 expect scoreInput sampleInput translateStrategy == 15

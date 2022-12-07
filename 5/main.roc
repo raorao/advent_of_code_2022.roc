@@ -5,16 +5,16 @@ app "day 5"
 
 stackTops = \crates ->
     crates
-        |> List.keepOks List.last
-        |> List.walk "" Str.concat
+    |> List.keepOks List.last
+    |> List.walk "" Str.concat
 
-apply9000Instruction = \crates, {count,originIndex,targetIndex} ->
+apply9000Instruction = \crates, { count, originIndex, targetIndex } ->
     origin =
         when List.get crates originIndex is
             Ok val -> val
             Err _ -> crash "could not access stack"
 
-    split = List.split origin ((List.len origin) - count)
+    split = List.split origin (List.len origin - count)
     newOrigin = split.before
     elems = split.others |> List.reverse
 
@@ -23,24 +23,24 @@ apply9000Instruction = \crates, {count,originIndex,targetIndex} ->
             Ok val -> val
             Err _ -> crash "could not access stack"
 
-
-    newTarget = target
+    newTarget =
+        target
         |> List.reserve (count + 1)
         |> List.concat elems
 
     crates
-        |> List.replace originIndex newOrigin
-        |> .list
-        |> List.replace targetIndex newTarget
-        |> .list
+    |> List.replace originIndex newOrigin
+    |> .list
+    |> List.replace targetIndex newTarget
+    |> .list
 
-apply9001Instruction = \crates, {count,originIndex,targetIndex} ->
+apply9001Instruction = \crates, { count, originIndex, targetIndex } ->
     origin =
         when List.get crates originIndex is
             Ok val -> val
             Err _ -> crash "could not access stack"
 
-    split = List.split origin ((List.len origin) - count)
+    split = List.split origin (List.len origin - count)
     newOrigin = split.before
     elems = split.others
 
@@ -49,17 +49,16 @@ apply9001Instruction = \crates, {count,originIndex,targetIndex} ->
             Ok val -> val
             Err _ -> crash "could not access stack"
 
-
-    newTarget = target
+    newTarget =
+        target
         |> List.reserve (count + 1)
         |> List.concat elems
 
     crates
-        |> List.replace originIndex newOrigin
-        |> .list
-        |> List.replace targetIndex newTarget
-        |> .list
-
+    |> List.replace originIndex newOrigin
+    |> .list
+    |> List.replace targetIndex newTarget
+    |> .list
 
 parseInstruction = \instructionStr ->
     parseNum = \str ->
@@ -71,9 +70,10 @@ parseInstruction = \instructionStr ->
         ["move", count, "from", originIndex, "to", targetIndex] ->
             {
                 count: parseNum count,
-                originIndex: (parseNum originIndex) - 1,
-                targetIndex: (parseNum targetIndex) - 1
+                originIndex: parseNum originIndex - 1,
+                targetIndex: parseNum targetIndex - 1,
             }
+
         _ -> crash "could not parse \(instructionStr)"
 
 # printCrates = \crates ->
@@ -81,18 +81,17 @@ parseInstruction = \instructionStr ->
 #         |> List.map (\c -> List.walk c "" Str.concat)
 #         |> List.intersperse "|"
 #         |> List.walk "" Str.concat
-
 apply9000Instructions = \crates, instructions ->
     instructions
-        |> List.map parseInstruction
-        |> List.walk crates apply9000Instruction
-        |> stackTops
+    |> List.map parseInstruction
+    |> List.walk crates apply9000Instruction
+    |> stackTops
 
 apply9001Instructions = \crates, instructions ->
     instructions
-        |> List.map parseInstruction
-        |> List.walk crates apply9001Instruction
-        |> stackTops
+    |> List.map parseInstruction
+    |> List.walk crates apply9001Instruction
+    |> stackTops
 
 main =
     task =
@@ -107,10 +106,11 @@ main =
             ["N", "V", "P", "W", "G", "S", "F", "M"],
             ["G", "C", "V", "B", "P", "Q"],
             ["Z", "B", "P", "N"],
-            ["W", "P", "J"]
+            ["W", "P", "J"],
         ]
 
-        parsedInstructions = input
+        parsedInstructions =
+            input
             |> Str.split "\n"
 
         part1 = apply9000Instructions crates parsedInstructions
@@ -121,21 +121,19 @@ main =
     Task.onFail task \_ -> crash "Failed to read and parse input"
 
 ## Tests
-
 sampleCrates = [
-    [ "Z", "N" ],
-    [ "M", "C", "D"],
-    [ "P" ]
+    ["Z", "N"],
+    ["M", "C", "D"],
+    ["P"],
 ]
 
 sampleInstructions = [
     "move 1 from 2 to 1",
     "move 3 from 1 to 3",
     "move 2 from 2 to 1",
-    "move 1 from 1 to 2"
+    "move 1 from 1 to 2",
 ]
 
 expect stackTops sampleCrates == "NDP"
 expect apply9000Instructions sampleCrates sampleInstructions == "CMZ"
 expect apply9001Instructions sampleCrates sampleInstructions == "MCD"
-

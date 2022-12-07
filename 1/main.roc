@@ -5,48 +5,46 @@ app "day 1"
 
 elfWithMostCalories = \calories ->
     calories
-        |> List.append Empty
-        |> List.walk {current: 0, max: 0} \state, elem ->
-            when elem is
-                Food calorieCount ->
-                    { state & current: (state.current + calorieCount) }
-                Empty ->
-                    {
-                        current: 0,
-                        max:
-                            if state.current > state.max then
-                                state.current
-                            else
-                                state.max
-                    }
+    |> List.append Empty
+    |> List.walk { current: 0, max: 0 } \state, elem ->
+        when elem is
+            Food calorieCount ->
+                { state & current: (state.current + calorieCount) }
 
-        |> .max
+            Empty ->
+                {
+                    current: 0,
+                    max: if state.current > state.max then
+                        state.current
+                    else
+                        state.max,
+                }
+    |> .max
 
 elvesWithMostCalories = \calories ->
     calories
-        |> List.append Empty
-        |> List.walk {current: 0, maxThree: [0,0,0]} \state, elem ->
-            when elem is
-                Food calorieCount ->
-                    { state & current: (state.current + calorieCount) }
-                Empty ->
-                    {
-                        current: 0,
-                        maxThree:
-                            state.maxThree
-                                |> List.append state.current
-                                |> List.sortDesc
-                                |> List.takeFirst 3
-                    }
+    |> List.append Empty
+    |> List.walk { current: 0, maxThree: [0, 0, 0] } \state, elem ->
+        when elem is
+            Food calorieCount ->
+                { state & current: (state.current + calorieCount) }
 
-        |> .maxThree
-        |> List.sum
+            Empty ->
+                {
+                    current: 0,
+                    maxThree: state.maxThree
+                    |> List.append state.current
+                    |> List.sortDesc
+                    |> List.takeFirst 3,
+                }
+    |> .maxThree
+    |> List.sum
 
 parseRow = \row ->
     when row is
         "" -> Empty
         str ->
-            when (Str.toNat str) is
+            when Str.toNat str is
                 Ok int -> Food int
                 Err _ -> crash "could not parse \(str)"
 
@@ -54,7 +52,8 @@ main =
     task =
         input <- Path.fromStr "input.txt" |> File.readUtf8 |> Task.await
 
-        parsedInput = input
+        parsedInput =
+            input
             |> Str.split "\n"
             |> List.map parseRow
 
@@ -66,7 +65,6 @@ main =
     Task.onFail task \_ -> crash "Failed to read and parse input"
 
 # TESTS
-
 exampleInput = [
     Food 1000,
     Food 2000,
@@ -81,7 +79,7 @@ exampleInput = [
     Food 8000,
     Food 9000,
     Empty,
-    Food 10000
+    Food 10000,
 ]
 
 expect elfWithMostCalories exampleInput == 24000
@@ -98,7 +96,7 @@ lastElfInput = [
     Food 6000,
     Empty,
     Food 7000,
-    Food 8000
+    Food 8000,
 ]
 
 expect elfWithMostCalories lastElfInput == 15000
@@ -113,11 +111,11 @@ firstElfInput = [
     Food 5000,
     Food 6000,
     Empty,
-    Food 7000
+    Food 7000,
 ]
 
 expect elfWithMostCalories firstElfInput == 15000
 
-emptyInput = [ ]
+emptyInput = []
 
 expect elfWithMostCalories emptyInput == 0
