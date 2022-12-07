@@ -32,7 +32,7 @@ main =
         input <- Path.fromStr "input.txt" |> File.readUtf8 |> Task.await
 
         part1 = startOfPacket input 4 |> Num.toStr
-        part2 = "TBD"
+        part2 = startOfPacket input 14 |> Num.toStr
 
         Stdout.write "part 1: \(part1) part 2: \(part2)"
 
@@ -43,3 +43,9 @@ expect startOfPacket "bvwbjplbgvbhsrlpgdmjqwftvncz" 4 == 5
 expect startOfPacket "nppdvjthqldpwncqszvftbrmjlhg" 4 == 6
 expect startOfPacket "nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg" 4 == 10
 expect startOfPacket "zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw" 4 == 11
+
+expect startOfPacket "mjqjpqmgbljsphdztnvjfqwrcgsmlb" 14 == 19
+expect startOfPacket "bvwbjplbgvbhsrlpgdmjqwftvncz" 14 == 23
+expect startOfPacket "nppdvjthqldpwncqszvftbrmjlhg" 14 == 23
+expect startOfPacket "nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg" 14 == 29
+expect startOfPacket "zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw" 14 == 26
