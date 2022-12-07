@@ -9,31 +9,57 @@ stackTops = \crates ->
         |> List.walk "" Str.concat
 
 apply9000Instruction = \crates, {count,originIndex,targetIndex} ->
-    List.repeat "" count
-        |> List.walk crates \memo, _ ->
-            origin =
-                when List.get memo originIndex is
-                    Ok val -> val
-                    Err _ -> crash "could not access stack"
+    origin =
+        when List.get crates originIndex is
+            Ok val -> val
+            Err _ -> crash "could not access stack"
 
-            newOrigin = List.dropLast origin
-            elem = List.last origin
+    split = List.split origin ((List.len origin) - count)
+    newOrigin = split.before
+    elems = split.others |> List.reverse
 
-            target =
-                when List.get memo targetIndex is
-                    Ok val -> val
-                    Err _ -> crash "could not access stack"
+    target =
+        when List.get crates targetIndex is
+            Ok val -> val
+            Err _ -> crash "could not access stack"
 
-            newTarget =
-                when elem is
-                    Ok val -> List.append target val
-                    Err _ -> target
 
-            memo
-                |> List.replace originIndex newOrigin
-                |> .list
-                |> List.replace targetIndex newTarget
-                |> .list
+    newTarget = target
+        |> List.reserve (count + 1)
+        |> List.concat elems
+
+    crates
+        |> List.replace originIndex newOrigin
+        |> .list
+        |> List.replace targetIndex newTarget
+        |> .list
+
+apply9001Instruction = \crates, {count,originIndex,targetIndex} ->
+    origin =
+        when List.get crates originIndex is
+            Ok val -> val
+            Err _ -> crash "could not access stack"
+
+    split = List.split origin ((List.len origin) - count)
+    newOrigin = split.before
+    elems = split.others
+
+    target =
+        when List.get crates targetIndex is
+            Ok val -> val
+            Err _ -> crash "could not access stack"
+
+
+    newTarget = target
+        |> List.reserve (count + 1)
+        |> List.concat elems
+
+    crates
+        |> List.replace originIndex newOrigin
+        |> .list
+        |> List.replace targetIndex newTarget
+        |> .list
+
 
 parseInstruction = \instructionStr ->
     parseNum = \str ->
@@ -50,10 +76,22 @@ parseInstruction = \instructionStr ->
             }
         _ -> crash "could not parse \(instructionStr)"
 
+# printCrates = \crates ->
+#     crates
+#         |> List.map (\c -> List.walk c "" Str.concat)
+#         |> List.intersperse "|"
+#         |> List.walk "" Str.concat
+
 apply9000Instructions = \crates, instructions ->
     instructions
         |> List.map parseInstruction
         |> List.walk crates apply9000Instruction
+        |> stackTops
+
+apply9001Instructions = \crates, instructions ->
+    instructions
+        |> List.map parseInstruction
+        |> List.walk crates apply9001Instruction
         |> stackTops
 
 main =
@@ -76,8 +114,9 @@ main =
             |> Str.split "\n"
 
         part1 = apply9000Instructions crates parsedInstructions
+        part2 = apply9001Instructions crates parsedInstructions
 
-        Stdout.write "part 1: \(part1)"
+        Stdout.write "part 1: \(part1) part 2: \(part2)"
 
     Task.onFail task \_ -> crash "Failed to read and parse input"
 
@@ -85,7 +124,7 @@ main =
 
 sampleCrates = [
     [ "Z", "N" ],
-    [ "M", "C", "D" ],
+    [ "M", "C", "D"],
     [ "P" ]
 ]
 
@@ -98,8 +137,5 @@ sampleInstructions = [
 
 expect stackTops sampleCrates == "NDP"
 expect apply9000Instructions sampleCrates sampleInstructions == "CMZ"
+expect apply9001Instructions sampleCrates sampleInstructions == "MCD"
 
-
-
-# remote last item in crate, append to target crate
-# calculcate last item in each stack, and combine into one string.
